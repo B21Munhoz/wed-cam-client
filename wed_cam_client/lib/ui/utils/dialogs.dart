@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:wed_cam_client/ui/aux/my_palett.dart';
+import 'package:wed_cam_client/ui/utils/my_palett.dart';
 
 
 Widget myLoading(){
@@ -30,7 +30,7 @@ Widget loginEnterDialog(){
     content: new Text(
       "Entrando...",
       style: TextStyle(
-          color: Colors.blue.shade800,
+          color: textPink,
           fontWeight: FontWeight.w800,
           fontSize: 20),
       textAlign: TextAlign.center,
@@ -38,7 +38,7 @@ Widget loginEnterDialog(){
     title: Container(
         color: Colors.white,
         child: Center(
-          child: CircularProgressIndicator(),
+          child: CircularProgressIndicator(color: textPink,),
         )),
   );
   return a;

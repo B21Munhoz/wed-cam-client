@@ -32,6 +32,9 @@ dependencies:
   http: ^0.13.4
   shared_preferences: ^2.0.8
   pub_semver: ^2.1.0
+  flutter_slidable: ^0.6.0
+  flutter_svg_provider: ^0.1.11
+  fl_toast: ^3.1.0
 
 dev_dependencies:
   flutter_test:
@@ -51,6 +54,8 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - images/wedding-camera.png
+    - images/wedding-rings.png
+    - images/wedding-day.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

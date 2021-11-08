@@ -3,9 +3,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:wed_cam_client/business_logic/login_data.dart';
-import 'package:wed_cam_client/ui/aux/my_palett.dart';
-import 'package:wed_cam_client/ui/aux/dialogs.dart';
+import 'package:wed_cam_client/ui/utils/my_palett.dart';
+import 'package:wed_cam_client/ui/utils/dialogs.dart';
 import 'package:wed_cam_client/ui/login/login_form.dart';
+import 'package:wed_cam_client/ui/login/register.dart';
+import 'package:wed_cam_client/api/base_request.dart';
+import 'package:wed_cam_client/ui/event/event.dart';
 
 
 class CustomLoginForm extends StatefulWidget {
@@ -123,20 +126,164 @@ class CustomLoginFormState extends State<CustomLoginForm> {
                             }),
                             // ROW DOS BOTÕES
                             Container(
-                              child: Row(
-                                mainAxisAlignment:
-                                MainAxisAlignment.spaceEvenly,
-                                children: <Widget>[
-                                  signUpButton(_data, () async {
+                              child: SizedBox(
+                                width: 325,
+                                child: Row(
+                                  mainAxisAlignment:
+                                  MainAxisAlignment.spaceEvenly,
+                                  children: <Widget>[
+                                    signUpButton(_data, () async {
+                                      await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => CreateUser(
+                                            isWeb: isWeb,
+                                          ),
+                                        ),
+                                      );
+                                    }),
+                                    signInButton(
+                                      _data,
+                                          () async {
+                                        if (_formKey.currentState!.validate()) {
+                                          try {
+                                            showDialog(
+                                                context: context,
+                                                builder: (BuildContext context) {
+                                                  return loginEnterDialog();
+                                                });
+                                            Map map = {
+                                              'username': _data.username,
+                                              'password': _data.password
+                                            };
+                                            var body = json.encode(map);
+                                            var url = Uri.http(baseUrl, '/api/login');
+                                            var uriResponse = await client.post(
+                                              url,
+                                            headers: {
+                                            "Content-Type":
+                                            "application/json",
+                                            "Access-Control-Allow-Origin": "*"
+                                            },
+                                              body: body,
+                                            ).whenComplete(() {}).timeout(const Duration(seconds: 10));
+                                            print(uriResponse.headers);
+                                            print(uriResponse.body);
+                                            print(uriResponse.statusCode);
+                                            if (uriResponse.statusCode == 200) {
+                                              _data.setLoginInfo();
+                                              var body =
+                                              jsonDecode(uriResponse.body)
+                                              as Map;
+                                              _data.token = body['token'];
 
-                                  }),
-                                  signInButton(
-                                    _data,
-                                        () async {
-
-                                    },
-                                  ),
-                                ],
+                                              await Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) => EventsPage(
+                                                    token: _data.token,
+                                                    isWeb: isWeb,
+                                                  ),
+                                                ),
+                                              );
+                                              Navigator.pop(context, true);
+                                            } else if (uriResponse.statusCode ==
+                                                400) {
+                                              Navigator.pop(context, true);
+                                              myErrorConfirmDialog(
+                                                context,
+                                                loginErrorAuthContext,
+                                              );
+                                            } else if (uriResponse.statusCode ==
+                                                500) {
+                                              Navigator.pop(context, true);
+                                              myErrorConfirmDialog(
+                                                context,
+                                                loginErrorInternalContext,
+                                              );
+                                            } else {
+                                              Navigator.pop(context, true);
+                                              myErrorConfirmDialog(
+                                                context,
+                                                loginErrorInternalContext,
+                                              );
+                                            }
+                                          } on TimeoutException catch (_) {
+                                            showDialog(
+                                                context: context,
+                                                builder: (BuildContext context) {
+                                                  return AlertDialog(
+                                                      title: new Text(
+                                                        "ERRO",
+                                                        style: TextStyle(
+                                                            color: Colors.red, fontWeight: FontWeight.w800, fontSize: 25),
+                                                        textAlign: TextAlign.center,
+                                                      ),
+                                                      content: new Text(
+                                                        "Tempo excedido",
+                                                        style: TextStyle(fontWeight: FontWeight.w600),
+                                                        textAlign: TextAlign.center,
+                                                      ),
+                                                      actions: <Widget>[
+                                                        new ElevatedButton(
+                                                            style: ElevatedButton.styleFrom(
+                                                              primary: Colors.red, // background
+                                                              onPrimary: Colors.white,
+                                                              elevation: 1,// foreground
+                                                            ),
+                                                            onPressed: () {
+                                                              Navigator.of(context).pop();
+                                                              Navigator.of(context).pop();
+                                                            },
+                                                            child: Text(
+                                                              "OK",
+                                                              style: TextStyle(fontSize: 20),
+                                                            ))
+                                                      ]);
+                                                });
+                                          } catch (e) {
+                                            print(e);
+                                            //Navigator.pop(context, true);
+                                            showDialog(
+                                                context: context,
+                                                builder: (BuildContext context) {
+                                                  return AlertDialog(
+                                                      title: new Text(
+                                                        "ERRO",
+                                                        style: TextStyle(
+                                                            color: Colors.red, fontWeight: FontWeight.w800, fontSize: 25),
+                                                        textAlign: TextAlign.center,
+                                                      ),
+                                                      content: new Text(
+                                                        "Não foi possível comunicar com o servidor.",
+                                                        style: TextStyle(fontWeight: FontWeight.w600),
+                                                        textAlign: TextAlign.center,
+                                                      ),
+                                                      actions: <Widget>[
+                                                        new ElevatedButton(
+                                                            style: ElevatedButton.styleFrom(
+                                                              primary: Colors.red, // background
+                                                              onPrimary: Colors.white,
+                                                              elevation: 1,// foreground
+                                                            ),
+                                                            onPressed: () {
+                                                              Navigator.of(context).pop();
+                                                              Navigator.of(context).pop();
+                                                            },
+                                                            child: Text(
+                                                              "OK",
+                                                              style: TextStyle(fontSize: 20),
+                                                            ))
+                                                      ]);
+                                                });
+                                          } finally {
+//                          client.close();
+                                          }
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ],
