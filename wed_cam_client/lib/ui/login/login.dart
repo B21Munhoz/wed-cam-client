@@ -167,9 +167,6 @@ class CustomLoginFormState extends State<CustomLoginForm> {
                                             },
                                               body: body,
                                             ).whenComplete(() {}).timeout(const Duration(seconds: 10));
-                                            print(uriResponse.headers);
-                                            print(uriResponse.body);
-                                            print(uriResponse.statusCode);
                                             if (uriResponse.statusCode == 200) {
                                               _data.setLoginInfo();
                                               var body =
@@ -183,6 +180,8 @@ class CustomLoginFormState extends State<CustomLoginForm> {
                                                   builder: (context) => EventsPage(
                                                     token: _data.token,
                                                     isWeb: isWeb,
+                                                    refWidget: CustomLoginForm(
+                                            isWeb: isWeb, ),
                                                   ),
                                                 ),
                                               );

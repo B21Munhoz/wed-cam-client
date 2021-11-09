@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:wed_cam_client/ui/event/confirm_invitation.dart';
+import 'package:wed_cam_client/ui/event/event_details.dart';
 import 'package:wed_cam_client/ui/utils/my_palett.dart';
 import 'package:wed_cam_client/ui/utils/others.dart';
 import 'package:wed_cam_client/ui/event/event_cards.dart';
@@ -15,26 +16,30 @@ import 'package:wed_cam_client/ui/event/create_event.dart';
 class EventsPage extends StatefulWidget {
   final isWeb;
   final token;
+  final refWidget;
 
   EventsPage({
     Key ?key,
     @required this.isWeb,
     @required this.token,
+    @required this.refWidget,
   }) : super(key: key);
 
   @override
   EventsPageState createState() =>
-      new EventsPageState(isWeb: isWeb, token: token);
+      new EventsPageState(isWeb: isWeb, token: token, refWidget: refWidget);
 }
 
 
 class EventsPageState extends State<EventsPage> {
   final isWeb;
   final token;
+  final refWidget;
   EventsPageState({
     Key ?key,
     @required this.isWeb,
     @required this.token,
+    @required this.refWidget,
   });
 
   final StreamController<EventData> _streamController =
@@ -67,7 +72,8 @@ class EventsPageState extends State<EventsPage> {
                       var url = Uri.http(
                           baseUrl, '/api/logout', {'q': '{http}'});
                       fetchGet(token, url, context);
-                      Navigator.pop(context, true);
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                          '/home', (Route<dynamic> route) => false);
                     },
                   )
                 ], [
@@ -101,7 +107,24 @@ class EventsPageState extends State<EventsPage> {
                                     },true);
                                 } else {
                                   return hostedEventCard(data.hostedEvents[index],
-                                    context, token, (i) async {}, (i) async {
+                                    context, token, (i) async {
+                                      print(data.hostedEvents[index].eventID);
+                                      await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => EventDetails(
+                                            token: token,
+                                            event: data.hostedEvents[index],
+                                            isWeb: isWeb,
+                                            refWidget: refWidget,
+                                            host: true,
+                                          ),
+                                        ),
+                                      );
+                                      setState(() {
+                                        data.getHostedEvents(token, context);
+                                      });
+                                    }, (i) async {
                                       var url = Uri.http(
                                           baseUrl, '/api/open_close_event', {'q': '{http}'});
                                       Map map = {
@@ -169,8 +192,19 @@ class EventsPageState extends State<EventsPage> {
                                   return guestEventCard(data.invitedEvents[index],
                                     context, token,
                                         (i) async {
+                                          await Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => EventDetails(
+                                                token: token,
+                                                event: data.invitedEvents[index],
+                                                isWeb: isWeb,
+                                                refWidget: refWidget,
+                                                host: false,
+                                              ),
+                                            ),
+                                          );
                                     },
-                                        (i) async {},
                                   );
                                 }
                               }),

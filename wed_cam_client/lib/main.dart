@@ -29,6 +29,9 @@ class HomeState extends State<Home> {
       title: "WeddingCam",
       home:
       CustomLoginForm(isWeb: UniversalPlatform.isWeb, ),
+      routes: <String, WidgetBuilder> {
+        '/home': (BuildContext context) => new CustomLoginForm(isWeb: UniversalPlatform.isWeb, )
+      },
 //      CustomLoginForm(isWeb: true),
     );
   }

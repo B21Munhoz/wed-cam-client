@@ -118,8 +118,7 @@ Widget guestEventCard(
     InvitedEvent d,
     context,
     token,
-    Future<Null> onTapFunction(int d),
-    Future<Null> openCloseEvent(int i)) {
+    Future<Null> onTapFunction(int d)) {
   Card c = new Card(
       color: Colors.white,
       elevation: 5,
